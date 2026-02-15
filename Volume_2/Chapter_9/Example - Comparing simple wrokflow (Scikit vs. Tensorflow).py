@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 13:26:45 2025
+
+@author: Admin
+"""
+
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import tensorflow as tf
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+	
+clf = RandomForestClassifier(random_state=42)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print("Accuracy (scikit-learn):", accuracy_score(y_test, y_pred))
+
+
+model = tf.keras.Sequential([
+tf.keras.layers.Input(shape=(4,)),
+tf.keras.layers.Dense(10, activation='relu'),
+tf.keras.layers.Dense(3, activation='softmax')
+])
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(X_train, y_train, epochs=50, verbose=0)
+print("Accuracy (TensorFlow):", model.evaluate(X_test, y_test, verbose=0)[1])

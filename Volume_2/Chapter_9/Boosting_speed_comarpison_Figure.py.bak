@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 15:14:55 2025
+
+@author: Nikola Anđelić
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Generate bar plot for boosting framework training time comparison.
+
+This script produces the figure:
+    figures/boosting_speed_comparison.png
+
+corresponding to Figure~\ref{fig:boosting_speed}.
+"""
+
+import matplotlib.pyplot as plt
+
+# Optional: set font to Times New Roman for consistency with the book
+plt.rcParams["font.family"] = "Times New Roman"
+
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc("font", size=SMALL_SIZE)
+plt.rc("axes", titlesize=MEDIUM_SIZE)
+plt.rc("axes", labelsize=MEDIUM_SIZE)
+plt.rc("xtick", labelsize=SMALL_SIZE)
+plt.rc("ytick", labelsize=SMALL_SIZE)
+plt.rc("legend", fontsize=SMALL_SIZE)
+plt.rc("figure", titlesize=BIGGER_SIZE)
+
+# Approximate training times from the previous examples (in seconds)
+models = [
+    "GradientBoosting\n(sklearn)",
+    "XGBoost",
+    "LightGBM",
+    "CatBoost"
+]
+
+training_times = [
+    30.2740,   # GradientBoostingClassifier (sklearn)
+    0.5302,    # XGBClassifier
+    0.34,      # LGBMClassifier
+    11.88      # CatBoostClassifier
+]
+
+fig, ax = plt.subplots(figsize=(12, 7))
+
+bars = ax.bar(models, training_times,color = "grey", zorder = 3)
+
+# Optionally annotate bars with the exact time values
+for bar, t in zip(bars, training_times):
+    height = bar.get_height()
+    ax.text(
+        bar.get_x() + bar.get_width() / 2.0,
+        height,
+        f"{t:.2f}s",
+        ha="center",
+        va="bottom"
+    )
+
+ax.set_ylabel("Training Time (seconds)")
+ax.set_title("Training Time Comparison of Boosting Frameworks\n(50,000 samples, 20 features)")
+ax.grid(axis="y", linestyle="--", alpha=0.6, zorder = 0)
+ax.set_ylim(0,35)
+plt.tight_layout()
+
+# Save figure (adjust path if needed to match your LaTeX project structure)
+plt.savefig(
+    "boosting_speed_comparison.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
