@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Dec 10 12:02:55 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import make_regression
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+# Step 1: Generate synthetic regression data
+X, y = make_regression(
+    n_samples=200,
+    n_features=1,
+    noise=15,
+    bias=30,
+    random_state=42
+)
+
+# Step 2: Fit a simple linear regression model for visualization
+model = LinearRegression()
+model.fit(X, y)
+y_pred = model.predict(X)
+
+# Step 3: Visualize the relationship in black & white
+plt.figure(figsize=(12, 8))
+
+# Scatter plot (data points) — black markers with white edges
+plt.scatter(
+    X, y,
+    color="black",
+    edgecolor="white",
+    s=40,
+    alpha=0.8,
+    label="Data Points"
+)
+
+# Regression line — medium gray for distinction
+# Sorting X for a clean line plot
+X_sorted = np.sort(X, axis=0)
+y_pred_sorted = model.predict(X_sorted)
+
+plt.plot(
+    X_sorted, y_pred_sorted,
+    color="dimgray",
+    linewidth=2.5,
+    label="Fitted Line"
+)
+
+plt.title("Synthetic Linear Regression Dataset")
+plt.xlabel("Feature")
+plt.ylabel("Target Value")
+plt.grid(True, zorder=0)
+
+# Legend below the plot (B&W-friendly)
+plt.legend(
+    loc="upper center",
+    bbox_to_anchor=(0.5, -0.12),
+    ncol=2,
+    frameon=True,
+    shadow=True
+)
+
+plt.tight_layout()
+plt.savefig("make_regression_example.png",
+            dpi = 300,
+            bbox_inches="tight")
+plt.show()

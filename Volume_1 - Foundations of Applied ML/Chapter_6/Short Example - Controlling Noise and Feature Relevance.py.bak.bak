@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Dec 10 12:20:16 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.datasets import make_regression
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Generate regression data: 10 features, 3 informative
+X, y = make_regression(
+    n_samples=500,
+    n_features=10,
+    n_informative=3,
+    noise=20,
+    random_state=0
+)
+
+# In make_regression, informative features are placed first by default:
+informative_idx = [0, 1, 2]
+
+# Create a 1x3 grid of subplots (one for each informative feature)
+fig, axes = plt.subplots(1, 3, figsize=(13, 3.8), sharey=True)
+
+for ax, idx in zip(axes, informative_idx):
+    ax.scatter(
+        X[:, idx],
+        y,
+        color="black",
+        edgecolor="white",
+        s=30,
+        alpha=0.8
+    )
+    ax.set_title(f"Feature {idx}")
+    ax.set_xlabel(f"X[:, {idx}]")
+    if ax is axes[0]:
+        ax.set_ylabel("Target")
+    ax.grid(True, zorder=0)
+
+plt.tight_layout()
+
+# Save figure for LaTeX
+plt.savefig("make_regression_informative_features.png",
+            dpi=300, bbox_inches="tight")
+
+plt.show()
+

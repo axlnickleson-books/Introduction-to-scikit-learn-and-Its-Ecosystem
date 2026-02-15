@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Dec 10 11:56:29 2025
+
+@author: Admin
+"""
+
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+import numpy as np
+
+# Generate two datasets: easy and hard classification
+X_easy, y_easy = make_classification(
+    n_samples=400,
+    n_features=2,
+    n_informative=2,
+    n_redundant=0,
+    class_sep=0.5,       # Low separation — overlapping
+    random_state=0
+)
+
+X_hard, y_hard = make_classification(
+    n_samples=400,
+    n_features=2,
+    n_informative=2,
+    n_redundant=0,
+    class_sep=2.0,       # High separation — well separated
+    random_state=0
+)
+
+# Marker shapes and labels for B&W-friendly plotting
+markers = {0: "o", 1: "s"}
+labels = {0: "Class 0", 1: "Class 1"}
+
+# Create two subplots
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# ---------------------
+# Plot 1: Easy classification
+# ---------------------
+ax = axes[0]
+for cls in np.unique(y_easy):
+    ax.scatter(
+        X_easy[y_easy == cls, 0],
+        X_easy[y_easy == cls, 1],
+        marker=markers[cls],
+        color="black",
+        edgecolor="k",
+        s=60,
+        alpha=0.8,
+        label=labels[cls]
+    )
+
+ax.set_title("Easy Classification (class_sep = 0.5)")
+ax.set_xlabel("Feature 1")
+ax.set_ylabel("Feature 2")
+ax.grid(True)
+
+# ---------------------
+# Plot 2: Hard classification
+# ---------------------
+ax = axes[1]
+for cls in np.unique(y_hard):
+    ax.scatter(
+        X_hard[y_hard == cls, 0],
+        X_hard[y_hard == cls, 1],
+        marker=markers[cls],
+        color="black",
+        edgecolor="k",
+        s=60,
+        alpha=0.8,
+        label=labels[cls]
+    )
+
+ax.set_title("Hard Classification (class_sep = 2.0)")
+ax.set_xlabel("Feature 1")
+ax.set_ylabel("Feature 2")
+ax.grid(True)
+
+# Combined legend centered below both plots
+handles, legend_labels = axes[0].get_legend_handles_labels()
+fig.legend(
+    handles, legend_labels,
+    loc="lower center",
+    ncol=2,
+    frameon=True,
+    shadow=True,
+    bbox_to_anchor=(0.5, -0.05)
+)
+
+plt.tight_layout()
+plt.savefig("class_sep_effect.png",
+            dpi = 300,
+            bbox_inches = "tight")
+plt.show()
