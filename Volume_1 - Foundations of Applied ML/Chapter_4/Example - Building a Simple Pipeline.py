@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 08:29:22 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load dataset
+data = load_breast_cancer()
+X, y = data.data, data.target
+	
+# Split into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+
+# Define the pipeline
+pipe = Pipeline([
+("scaler", StandardScaler()),         # Step 1: Transformer
+("model", LogisticRegression(max_iter=1000))  # Step 2: Predictor
+])
+
+# Fit the entire pipeline
+pipe.fit(X_train, y_train)
+
+# Predict on test data
+y_pred = pipe.predict(X_test)
+	
+print("Predicted labels (first 10):", y_pred[:10])
+
+
+# Evaluate performance
+acc = accuracy_score(y_test, y_pred)
+print(f"Test Accuracy: {acc:.4f}")
+	
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=data.target_names))
+
+print("Pipeline parameters:")
+print(pipe.get_params().keys())

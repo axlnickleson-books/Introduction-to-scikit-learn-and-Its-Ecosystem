@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 08:10:07 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+accuracy_score, precision_score, recall_score,
+f1_score, roc_auc_score, confusion_matrix,
+classification_report, RocCurveDisplay
+)
+import matplotlib.pyplot as plt
+plt.rcParams["font.family"] = "Times New Roman"
+
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+# Load dataset
+data = load_breast_cancer()
+
+# Split into training and testing subsets (70:30 ratio)
+X_train, X_test, y_train, y_test = train_test_split(
+data.data, data.target,
+test_size=0.3,
+random_state=42,
+stratify=data.target
+)
+
+model = RandomForestClassifier(
+	n_estimators=200,
+	random_state=42
+	)
+	
+model.fit(X_train, y_train)
+# Class labels
+y_pred = model.predict(X_test)
+	
+# Class probabilities for positive class (needed for AUC)
+y_proba = model.predict_proba(X_test)[:, 1]
+    
+acc  = accuracy_score(y_test, y_pred)
+prec = precision_score(y_test, y_pred)
+rec  = recall_score(y_test, y_pred)
+f1   = f1_score(y_test, y_pred)
+auc  = roc_auc_score(y_test, y_proba)    
+    
+print(f"Accuracy  : {acc:.4f}")
+print(f"Precision : {prec:.4f}")
+print(f"Recall    : {rec:.4f}")
+print(f"F1-score  : {f1:.4f}")
+print(f"AUC       : {auc:.4f}")
+    
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=data.target_names))
+	
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+
+
+fig, ax = plt.subplots(figsize=(12, 8))
+RocCurveDisplay.from_predictions(y_test, y_proba, ax=ax)
+
+ax.set_title("ROC Curve - Random Forest Classifier")
+ax.grid(True)
+plt.savefig("roc_curve_random_forest.png",
+           dpi = 300, 
+           bbox_inches = "tight")
+plt.show()
+    
+train_acc = model.score(X_train, y_train)
+test_acc  = model.score(X_test, y_test)
+	
+print(f"Train Accuracy: {train_acc:.4f}")
+print(f"Test Accuracy : {test_acc:.4f}")
+    
+    
+    
+    
+    
+    
+    
+    

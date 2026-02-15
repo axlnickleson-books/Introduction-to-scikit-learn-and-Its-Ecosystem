@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 10:37:58 2025
+
+@author: Admin
+"""
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+	
+# Load and split data
+data = load_breast_cancer()
+X_train, X_test, y_train, y_test = train_test_split(
+	data.data, data.target, test_size=0.3, random_state=42, stratify=data.target
+	)
+	
+# Define pipeline
+pipe = Pipeline([
+("scaler", StandardScaler()),
+("model", LogisticRegression(max_iter=1000))
+])
+	
+# Define parameter grid
+param_grid = {
+	"scaler__with_mean": [True, False],
+	"model__C": [0.01, 0.1, 1, 10],
+	"model__penalty": ["l2"],
+	"model__solver": ["lbfgs", "liblinear"]
+}
+	
+# Perform grid search
+grid = GridSearchCV(pipe, param_grid, cv=5, scoring="accuracy", n_jobs=-1)
+grid.fit(X_train, y_train)
+
+# Display results
+print("Best Parameters:", grid.best_params_)
+print("Best Cross-Validation Score:", grid.best_score_)
+print("Test Accuracy:", grid.score(X_test, y_test))
