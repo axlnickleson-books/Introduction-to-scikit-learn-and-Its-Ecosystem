@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 25 14:26:58 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+import pandas as pd
+
+titanic = fetch_openml("titanic", version=1, as_frame=True)
+X, y = titanic.data, titanic.target
+	
+print("Shape:", X.shape, y.shape)
+print("Columns:", X.columns[:10])
+print("Target:", y.unique())
+
+num_features = ["age", "fare"]
+cat_features = ["sex", "embarked", "pclass"]
+
+num_transformer = Pipeline(steps=[
+	("imputer", SimpleImputer(strategy="mean")),
+	("scaler", StandardScaler())
+	])
+	
+cat_transformer = Pipeline(steps=[
+	("imputer", SimpleImputer(strategy="most_frequent")),
+	("encoder", OneHotEncoder(handle_unknown="ignore"))
+	])
+	
+preprocessor = ColumnTransformer(
+	transformers=[
+	("num", num_transformer, num_features),
+	("cat", cat_transformer, cat_features)
+	]
+	)
+X_train, X_test, y_train, y_test = train_test_split(
+	X, y, test_size=0.2, random_state=42, stratify=y
+	)
+	
+X_train_processed = preprocessor.fit_transform(X_train)
+X_test_processed = preprocessor.transform(X_test)
+	
+print("Processed train shape:", X_train_processed.shape)
+print("Processed test shape:", X_test_processed.shape)
+
+# OneHotEncoder creates new columns for categories
+cat_columns = preprocessor.named_transformers_["cat"]\
+	.named_steps["encoder"].get_feature_names_out(cat_features)
+	
+all_columns = num_features + list(cat_columns)
+print("Feature names after preprocessing:", all_columns[:10])

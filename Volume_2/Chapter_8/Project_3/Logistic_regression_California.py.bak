@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Sep 24 10:38:11 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+	
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+data = fetch_california_housing(as_frame=True)
+df = data.frame   # pandas DataFrame with features + target
+X, y = data.data, data.target
+	
+print("Shape X, y:", X.shape, y.shape)
+print("First 5 features:\n", df.head())
+print("Target variable:", data.target_names)
+
+
+print(df.describe().T)
+
+# df.describe().T.to_csv("California_Descriptive.csv")
+corr = df.corr(numeric_only=True)['MedHouseVal'].sort_values(ascending=False)
+print("Correlation with target:\n", corr)
+
+
+df['MedHouseVal'].hist(bins=50, figsize=(8,6), zorder=3)
+plt.xlabel("Median House Value ($100,000s)")
+plt.ylabel("Frequency")
+plt.title("Distribution of Median House Values")
+plt.show()
+# plt.savefig("Distribtuion_target_variable.png",
+#             dpi = 300, 
+            # bbox_inches="tight")
+            
+X_train, X_test, y_train, y_test = train_test_split(
+	X, y, test_size=0.2, random_state=42
+	)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)
+lin_reg = LinearRegression()
+lin_reg.fit(X_train_scaled, y_train)
+y_pred = lin_reg.predict(X_test_scaled)
+	
+mse  = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+mae  = mean_absolute_error(y_test, y_pred)
+r2   = r2_score(y_test, y_pred)
+	
+print(f"RMSE: {rmse:.3f}")
+print(f"MAE:  {mae:.3f}")
+print(f"R^2:  {r2:.3f}")
+
+plt.scatter(y_test, y_pred, alpha=0.3)
+plt.xlabel("Actual House Value")
+plt.ylabel("Predicted House Value")
+plt.title("Actual vs Predicted House Prices")
+plt.plot([y_test.min(), y_test.max()],
+[y_test.min(), y_test.max()], 'r--')  # perfect prediction line
+plt.grid(True)
+# plt.show()
+plt.savefig("AcutalVSPredictedHP.png",
+            dpi = 300,
+            bbox_inches="tight")

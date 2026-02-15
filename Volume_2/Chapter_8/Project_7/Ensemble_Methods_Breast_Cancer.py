@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Sep 23 15:42:15 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.pipeline import Pipeline
+
+data = load_breast_cancer()
+X, y = data.data, data.target
+	
+X_train, X_test, y_train, y_test = train_test_split(
+	X, y, test_size=0.2, random_state=42, stratify=y
+	)
+rf_pipeline = Pipeline([
+	("scaler", StandardScaler()),
+	("clf", RandomForestClassifier(n_estimators=200, random_state=42))
+	])
+	
+gb_pipeline = Pipeline([
+	("scaler", StandardScaler()),
+	("clf", GradientBoostingClassifier(n_estimators=200, learning_rate=0.1, random_state=42))
+	])
+rf_pipeline.fit(X_train, y_train)
+gb_pipeline.fit(X_train, y_train)
