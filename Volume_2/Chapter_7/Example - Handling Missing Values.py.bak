@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 15:41:13 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.impute import SimpleImputer
+import numpy as np
+
+# Numerical data with missing values
+X = np.array([[1, 2], [np.nan, 3], [7, 6]])
+
+# Mean imputation
+imputer_mean = SimpleImputer(strategy="mean")
+X_mean = imputer_mean.fit_transform(X)
+
+# Median imputation
+imputer_median = SimpleImputer(strategy="median")
+X_median = imputer_median.fit_transform(X)
+
+# Most frequent imputation
+imputer_freq = SimpleImputer(strategy="most_frequent")
+X_freq = imputer_freq.fit_transform(X)
+
+print("Mean imputed:\n", X_mean)
+print("Median imputed:\n", X_median)
+print("Most frequent imputed:\n", X_freq)

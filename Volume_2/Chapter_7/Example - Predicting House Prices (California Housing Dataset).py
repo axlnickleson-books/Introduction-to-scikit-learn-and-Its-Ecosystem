@@ -1,0 +1,213 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 08:39:44 2025
+
+@author: Admin
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.linear_model import (LinearRegression as LR,
+                                  Ridge,
+                                  Lasso)
+from sklearn.tree import DecisionTreeRegressor as DTR
+from sklearn.ensemble import RandomForestRegressor as RFR
+from sklearn.svm import SVR
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (r2_score as R2,
+                             mean_absolute_error as MAE,
+                             mean_squared_error as MSE,
+                             mean_absolute_percentage_error as MAPE)
+
+from sklearn.datasets import fetch_california_housing
+plt.rcParams["font.family"] = "Times New Roman"
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+# =============================================================================
+# 1. Load dataset and train/test split
+# =============================================================================
+data = fetch_california_housing()
+X, y = data.data, data.target
+feature_names = data.feature_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.3,
+    random_state=42
+)
+
+# =============================================================================
+# 2. Define models
+# =============================================================================
+models = {
+    "LinearRegression": LR(),
+    "Ridge": Ridge(),
+    "Lasso": Lasso(),
+    "DecisionTreeRegressor": DTR(random_state=42),
+    "RandomForestRegressor": RFR(random_state=42),
+    "SVR": SVR()
+}
+
+MLNames = list(models.keys())
+
+# To store metrics for later plotting
+results = {
+    "model": [],
+    "R2_train": [],
+    "R2_test": [],
+    "MAE_train": [],
+    "MAE_test": [],
+    "MSE_train": [],
+    "MSE_test": [],
+    "RMSE_train": [],
+    "RMSE_test": [],
+    "MAPE_train": [],
+    "MAPE_test": []
+}
+
+# =============================================================================
+# 3. Train, evaluate, and print results
+# =============================================================================
+for name in MLNames:
+    print("##################################################################")
+    print(f"# {name}")
+    print("##################################################################")
+
+    model = models[name]
+    model.fit(X_train, y_train)
+
+    y_pred_train = model.predict(X_train)
+    y_pred_test = model.predict(X_test)
+
+    R2_train = R2(y_train, y_pred_train)
+    R2_test = R2(y_test, y_pred_test)
+
+    MAE_train = MAE(y_train, y_pred_train)
+    MAE_test = MAE(y_test, y_pred_test)
+
+    MSE_train = MSE(y_train, y_pred_train)
+    MSE_test = MSE(y_test, y_pred_test)
+
+    RMSE_train = np.sqrt(MSE_train)
+    RMSE_test = np.sqrt(MSE_test)
+
+    MAPE_train = MAPE(y_train, y_pred_train)
+    MAPE_test = MAPE(y_test, y_pred_test)
+
+    print(
+        f"R2_train  = {R2_train:.4f}\n"
+        f"R2_test   = {R2_test:.4f}\n"
+        f"MAE_train = {MAE_train:.4f}\n"
+        f"MAE_test  = {MAE_test:.4f}\n"
+        f"MSE_train = {MSE_train:.4f}\n"
+        f"MSE_test  = {MSE_test:.4f}\n"
+        f"RMSE_train = {RMSE_train:.4f}\n"
+        f"RMSE_test  = {RMSE_test:.4f}\n"
+        f"MAPE_train = {MAPE_train:.4f}\n"
+        f"MAPE_test  = {MAPE_test:.4f}\n"
+    )
+
+    # Store metrics for plotting
+    results["model"].append(name)
+    results["R2_train"].append(R2_train)
+    results["R2_test"].append(R2_test)
+    results["MAE_train"].append(MAE_train)
+    results["MAE_test"].append(MAE_test)
+    results["MSE_train"].append(MSE_train)
+    results["MSE_test"].append(MSE_test)
+    results["RMSE_train"].append(RMSE_train)
+    results["RMSE_test"].append(RMSE_test)
+    results["MAPE_train"].append(MAPE_train)
+    results["MAPE_test"].append(MAPE_test)
+
+# Put everything in a DataFrame (nice for printing in the book as a table)
+results_df = pd.DataFrame(results)
+print("\n===== Summary of Test Performance =====")
+print(results_df[["model", "R2_test", "RMSE_test", "MAE_test", "MAPE_test"]])
+
+# =============================================================================
+# 4. FIGURE 1 – Bar plot of R² on the test set for all models
+# =============================================================================
+plt.figure(figsize=(12, 8))
+plt.bar(results_df["model"], results_df["R2_test"], color = "grey", zorder = 3)
+plt.title("Test R² Score for Different Regression Models")
+plt.xlabel("Model")
+plt.ylabel("R² on Test Set")
+plt.xticks([0,1,2,3,4,5], 
+           ['Linear\nRegression',
+            'Ridge', 
+            'Lasso', 
+            'Decision\nTree\nRegressor',
+            'Random\nForest\nRegressor',
+            'SVR'])
+plt.grid(True, zorder= 0)
+plt.tight_layout()
+plt.savefig("Test_r2_score_different_models.png",
+            dpi = 300, 
+            bbox_inches = "tight")
+plt.show()
+
+# =============================================================================
+# 5. FIGURE 2 – True vs Predicted (best model by R²_test)
+# =============================================================================
+# Find the best model according to R2_test
+best_idx = results_df["R2_test"].idxmax()
+best_model_name = results_df.loc[best_idx, "model"]
+print(f"\nBest model (by R2_test): {best_model_name}")
+
+best_model = models[best_model_name]
+# Refit to be safe (in case you rerun this cell)
+best_model.fit(X_train, y_train)
+y_pred_best = best_model.predict(X_test)
+
+plt.figure(figsize=(12, 8))
+plt.scatter(y_test, y_pred_best, alpha=0.5, color = "black",  zorder = 3)
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         linestyle="--", linewidth=2, color = "black", zorder = 3)
+plt.xlabel("True Median House Value")
+plt.ylabel("Predicted Median House Value")
+plt.title(f"True vs. Predicted Values ({best_model_name})")
+plt.tight_layout()
+plt.grid(True, zorder = 0)
+plt.savefig("True_vs_prder_values_RFR.png",
+            dpi = 300, 
+            bbox_inches = "tight")
+plt.show()
+
+# =============================================================================
+# 6. FIGURE 3 – Feature importances for RandomForestRegressor (optional)
+# =============================================================================
+if "RandomForestRegressor" in models:
+    rf_model = models["RandomForestRegressor"]
+    rf_model.fit(X_train, y_train)
+    importances = rf_model.feature_importances_
+
+    # Sort by importance (descending)
+    indices = np.argsort(importances)[::-1]
+    sorted_features = [feature_names[i] for i in indices]
+    sorted_importances = importances[indices]
+
+    plt.figure(figsize=(12, 8))
+    plt.bar(range(len(sorted_features)), sorted_importances, color = "grey", zorder = 3)
+    plt.xticks(range(len(sorted_features)), sorted_features, rotation=90)
+    plt.ylabel("Feature Importance")
+    plt.title("RandomForestRegressor – Feature Importances")
+    plt.xlabel("Selected Dataset Features")
+    plt.tight_layout()
+    plt.grid(True, zorder = 0)
+    plt.savefig("RFR_Feature_Importances_Claifornia_housing.png",
+                dpi = 300, 
+                bbox_inches = "tight")
+    plt.show()

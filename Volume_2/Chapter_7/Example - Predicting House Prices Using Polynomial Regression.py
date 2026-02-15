@@ -1,0 +1,186 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 11:57:39 2025
+
+@author: Admin
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+# =============================================================================
+# 1. Load dataset and select a few features
+# =============================================================================
+data = fetch_california_housing()
+X_full = pd.DataFrame(data.data, columns=data.feature_names)
+y = data.target  # median house value (in $100,000)
+
+# Select a subset of features to avoid huge polynomial feature explosion
+selected_features = ["MedInc", "HouseAge", "AveRooms", "AveOccup"]
+X = X_full[selected_features].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.3,
+    random_state=42
+)
+
+# =============================================================================
+# 2. Helper function to build a Polynomial Regression pipeline
+# =============================================================================
+def make_poly_model(degree: int) -> Pipeline:
+    """
+    Create a pipeline: PolynomialFeatures -> StandardScaler -> LinearRegression
+    """
+    return Pipeline([
+        ("poly", PolynomialFeatures(degree=degree, include_bias=False)),
+        ("scaler", StandardScaler()),
+        ("lr", LinearRegression())
+    ])
+
+# =============================================================================
+# 3. Train Polynomial Regression models for multiple degrees
+# =============================================================================
+degrees = [1, 2, 3]
+
+results = []  # we'll append dicts, easier and safer for DataFrame
+
+for d in degrees:
+    print("============================================================")
+    print(f"Polynomial Regression (degree = {d})")
+    print("============================================================")
+
+    model = make_poly_model(d)
+    model.fit(X_train, y_train)
+
+    y_pred_train = model.predict(X_train)
+    y_pred_test = model.predict(X_test)
+
+    R2_train = r2_score(y_train, y_pred_train)
+    R2_test = r2_score(y_test, y_pred_test)
+
+    RMSE_train = np.sqrt(mean_squared_error(y_train, y_pred_train))
+    RMSE_test = np.sqrt(mean_squared_error(y_test, y_pred_test))
+
+    MAE_train = mean_absolute_error(y_train, y_pred_train)
+    MAE_test = mean_absolute_error(y_test, y_pred_test)
+
+    print(f"R2_train   = {R2_train:.4f}")
+    print(f"R2_test    = {R2_test:.4f}")
+    print(f"RMSE_train = {RMSE_train:.4f}")
+    print(f"RMSE_test  = {RMSE_test:.4f}")
+    print(f"MAE_train  = {MAE_train:.4f}")
+    print(f"MAE_test   = {MAE_test:.4f}\n")
+
+    results.append({
+        "model": f"Poly (deg={d})",
+        "degree": d,
+        "R2_train": R2_train,
+        "R2_test": R2_test,
+        "RMSE_train": RMSE_train,
+        "RMSE_test": RMSE_test,
+        "MAE_train": MAE_train,
+        "MAE_test": MAE_test
+    })
+
+# =============================================================================
+# 4. Train RandomForestRegressor as a nonlinear baseline
+# =============================================================================
+print("============================================================")
+print("RandomForestRegressor (baseline)")
+print("============================================================")
+
+rf = RandomForestRegressor(
+    n_estimators=200,
+    max_depth=None,
+    random_state=42,
+    n_jobs=-1
+)
+rf.fit(X_train, y_train)
+
+y_pred_train_rf = rf.predict(X_train)
+y_pred_test_rf = rf.predict(X_test)
+
+R2_train_rf = r2_score(y_train, y_pred_train_rf)
+R2_test_rf = r2_score(y_test, y_pred_test_rf)
+
+RMSE_train_rf = np.sqrt(mean_squared_error(y_train, y_pred_train_rf))
+RMSE_test_rf = np.sqrt(mean_squared_error(y_test, y_pred_test_rf))
+
+MAE_train_rf = mean_absolute_error(y_train, y_pred_train_rf)
+MAE_test_rf = mean_absolute_error(y_test, y_pred_test_rf)
+
+print(f"R2_train   = {R2_train_rf:.4f}")
+print(f"R2_test    = {R2_test_rf:.4f}")
+print(f"RMSE_train = {RMSE_train_rf:.4f}")
+print(f"RMSE_test  = {RMSE_test_rf:.4f}")
+print(f"MAE_train  = {MAE_train_rf:.4f}")
+print(f"MAE_test   = {MAE_test_rf:.4f}\n")
+
+results.append({
+    "model": "RandomForestRegressor",
+    "degree": 0,  # or np.nan, just a placeholder
+    "R2_train": R2_train_rf,
+    "R2_test": R2_test_rf,
+    "RMSE_train": RMSE_train_rf,
+    "RMSE_test": RMSE_test_rf,
+    "MAE_train": MAE_train_rf,
+    "MAE_test": MAE_test_rf
+})
+
+# =============================================================================
+# 5. Build results DataFrame and inspect
+# =============================================================================
+results_df = pd.DataFrame(results)
+print("===== Summary over polynomial degrees and RandomForestRegressor =====")
+print(results_df)
+
+# =============================================================================
+# 6. Plot R² on train and test vs. polynomial degree (poly only)
+# =============================================================================
+poly_df = results_df[results_df["model"].str.startswith("Poly")].copy()
+
+plt.figure(figsize=(12, 8))
+
+# Polynomial Train R^2 — solid line with circles
+plt.plot(
+    poly_df["degree"], poly_df["R2_train"],
+    marker="o", linestyle="-", color="black",
+    label="Polynomial Train R$^2$"
+)
+
+# Polynomial Test R^2 — dashed line with squares
+plt.plot(
+    poly_df["degree"], poly_df["R2_test"],
+    marker="s", linestyle="--", color="black",
+    label="Polynomial Test R$^2$"
+)
+
+# RandomForest Test R^2 — dotted horizontal line
+plt.axhline(
+    y=R2_test_rf,
+    linestyle=":", color="black",
+    label="RandomForest Test R$^2$"
+)
+
+plt.xlabel("Polynomial Degree")
+plt.ylabel("R$^2$ Score")
+plt.title("Polynomial Regression vs. RandomForest (House Price Prediction)")
+plt.xticks(degrees)
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+
+plt.show()
+plt.savefig("PolyReg_Vs_Rand_Forest_House_Price_Pred.png",
+            dpi = 300,
+            bbox_inches = "tight")

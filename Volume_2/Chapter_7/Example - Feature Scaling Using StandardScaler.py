@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 15:44:28 2025
+
+@author: Admin
+"""
+
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+# Sample dataset (after imputation in previous example)
+X_imputed = np.array([
+    [1.0, 2.0],
+    [4.0, 3.0],
+    [7.0, 6.0]
+])
+
+# Initialize the scaler
+scaler = StandardScaler()
+
+# Fit scaler to the data and transform it
+X_scaled = scaler.fit_transform(X_imputed)
+
+# Inspect the results
+print("Scaled data:\n", X_scaled)
+print("Feature means (before scaling):", scaler.mean_)
+print("Feature standard deviations (before scaling):", scaler.scale_)

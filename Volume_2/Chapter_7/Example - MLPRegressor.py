@@ -1,0 +1,85 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 16:12:39 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------------------
+# Step 1 — Load the California Housing dataset
+# ------------------------------------------------------------
+X, y = fetch_california_housing(return_X_y=True)
+
+# ------------------------------------------------------------
+# Step 2 — Scale the features (very important for MLPs)
+# ------------------------------------------------------------
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# ------------------------------------------------------------
+# Step 3 — Train–test split
+# ------------------------------------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.3,
+    random_state=42
+)
+
+# ------------------------------------------------------------
+# Step 4 — Initialize the MLP regressor
+# ------------------------------------------------------------
+reg = MLPRegressor(
+    hidden_layer_sizes=(80, 40),
+    activation="relu",
+    solver="adam",
+    learning_rate="adaptive",
+    max_iter=500,
+    random_state=42
+)
+
+# ------------------------------------------------------------
+# Step 5 — Train the model
+# ------------------------------------------------------------
+reg.fit(X_train, y_train)
+
+# ------------------------------------------------------------
+# Step 6 — Predict on the test set
+# ------------------------------------------------------------
+y_pred = reg.predict(X_test)
+
+# ------------------------------------------------------------
+# Step 7 — Evaluate regression performance
+# ------------------------------------------------------------
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("Mean Squared Error:", mse)
+print("R² Score:", r2)
+
+# ------------------------------------------------------------
+# Step 8 — Plot predicted vs. actual values
+# ------------------------------------------------------------
+plt.scatter(y_test, y_pred, alpha=0.5)
+plt.xlabel("True Values")
+plt.ylabel("Predicted Values")
+plt.title("MLPRegressor — True vs. Predicted Values")
+plt.grid(True)
+plt.show()
+
+# ------------------------------------------------------------
+# Step 9 — Plot the training loss curve
+# ------------------------------------------------------------
+plt.plot(reg.loss_curve_)
+plt.title("MLPRegressor Training Loss Curve")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.grid(True)
+plt.show()

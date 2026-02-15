@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 16:06:35 2025
+
+@author: Admin
+"""
+
+from sklearn.ensemble import VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+
+# ------------------------------------------------------------
+# Load a sample dataset
+# ------------------------------------------------------------
+X, y = load_iris(return_X_y=True)
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.3,
+    random_state=42,
+    stratify=y
+)
+
+# ------------------------------------------------------------
+# Define individual base classifiers
+# ------------------------------------------------------------
+log_clf = LogisticRegression(max_iter=1000)
+svc_clf = SVC(kernel="rbf", probability=True)
+tree_clf = DecisionTreeClassifier(max_depth=5, random_state=42)
+
+# ------------------------------------------------------------
+# Build a soft voting ensemble
+# ------------------------------------------------------------
+voting_clf = VotingClassifier(
+    estimators=[
+        ("lr", log_clf),
+        ("svc", svc_clf),
+        ("dt", tree_clf)
+    ],
+    voting="soft"  # uses predicted class probabilities
+)
+
+# ------------------------------------------------------------
+# Train the ensemble model
+# ------------------------------------------------------------
+voting_clf.fit(X_train, y_train)
+
+# ------------------------------------------------------------
+# Predict and evaluate
+# ------------------------------------------------------------
+y_pred = voting_clf.predict(X_test)
+print("Voting Ensemble Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# ------------------------------------------------------------
+# (Optional) Compare with individual classifiers
+# ------------------------------------------------------------
+for name, model in voting_clf.named_estimators_.items():
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+    print(f"{name.upper()} Accuracy: {accuracy_score(y_test, pred)}")

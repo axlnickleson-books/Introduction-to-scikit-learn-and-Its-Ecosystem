@@ -1,0 +1,82 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 16:15:05 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.datasets import load_digits
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import numpy as np
+
+# ------------------------------------------------------------
+# Step 1 — Load dataset
+# ------------------------------------------------------------
+X, y = load_digits(return_X_y=True)
+
+# ------------------------------------------------------------
+# Step 2 — Scale features for chi² test (must be non-negative)
+# ------------------------------------------------------------
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X)
+
+# ------------------------------------------------------------
+# Step 3 — Select top K features using chi² scores
+# ------------------------------------------------------------
+selector = SelectKBest(score_func=chi2, k=20)
+X_selected = selector.fit_transform(X_scaled, y)
+
+# ------------------------------------------------------------
+# Inspect selected feature indices
+# ------------------------------------------------------------
+selected_indices = selector.get_support(indices=True)
+print("Selected feature indices:", selected_indices)
+
+# ------------------------------------------------------------
+# Optional — Visualize chi² scores
+# ------------------------------------------------------------
+scores = selector.scores_
+plt.bar(np.arange(len(scores)), scores)
+plt.title("Chi² Feature Scores (Digits Dataset)")
+plt.xlabel("Feature Index")
+plt.ylabel("Chi² Score")
+plt.grid(True)
+plt.show()
+
+# ------------------------------------------------------------
+# Step 4 — Split into training and test sets
+# ------------------------------------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X_selected,
+    y,
+    test_size=0.3,
+    random_state=42,
+    stratify=y
+)
+
+# ------------------------------------------------------------
+# Step 5 — Train a classifier
+# ------------------------------------------------------------
+clf = RandomForestClassifier(random_state=42)
+clf.fit(X_train, y_train)
+
+# ------------------------------------------------------------
+# Step 6 — Predict and evaluate
+# ------------------------------------------------------------
+y_pred = clf.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+# ------------------------------------------------------------
+# Optional — Compare accuracy without feature selection
+# ------------------------------------------------------------
+clf_full = RandomForestClassifier(random_state=42)
+clf_full.fit(X_scaled, y)
+y_pred_full = clf_full.predict(X_scaled)
+
+print("Training accuracy without feature selection:",
+      accuracy_score(y, y_pred_full))

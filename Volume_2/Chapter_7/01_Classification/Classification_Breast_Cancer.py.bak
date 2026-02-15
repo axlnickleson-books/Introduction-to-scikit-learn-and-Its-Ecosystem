@@ -1,0 +1,275 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 26 09:33:53 2025
+
+@author: Nikola Anđelić
+"""
+
+from sklearn.linear_model import LogisticRegression as LR 
+from sklearn.neighbors import KNeighborsClassifier as KNN
+from sklearn.tree import DecisionTreeClassifier as DTC
+from sklearn.ensemble import RandomForestClassifier as RFC
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split 
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import (accuracy_score as ACC,
+roc_auc_score as AUC, 
+precision_score as Prec, 
+recall_score as Rec, 
+f1_score as F1,
+confusion_matrix as CM)
+import matplotlib.pyplot as plt
+import seaborn as sns 
+
+data = load_breast_cancer()
+X, y = data.data, data.target
+
+print("X.shape = {}".format(X.shape))
+print("y.shape = {}".format(y.shape))
+
+
+X_train,X_test, y_train, y_test = train_test_split(X,y, test_size = 0.3, 
+random_state = 42)
+
+model_LR = LR()
+model_KNN = KNN()
+model_DTC = DTC()
+model_RFC = RFC()
+model_SVC = SVC()
+
+model_LR.fit(X_train,y_train)
+model_KNN.fit(X_train,y_train)
+model_DTC.fit(X_train,y_train)
+model_RFC.fit(X_train,y_train)
+model_SVC.fit(X_train,y_train)
+
+
+
+#Logistic_Regression 
+y_pred_LR_train = model_LR.predict(X_train)
+y_pred_LR_test = model_LR.predict(X_test)
+print("LogisticRegression")
+print(" ACC_train:", ACC(y_train, y_pred_LR_train))
+print(" ACC_test:", ACC(y_test, y_pred_LR_test))
+print(" AUC_train:", AUC(y_train, y_pred_LR_train))
+print(" AUC_test:", AUC(y_test, y_pred_LR_test))
+print(" Prec_train:", Prec(y_train, y_pred_LR_train))
+print(" Prec_test:", Prec(y_test, y_pred_LR_test))
+print(" Rec_train:", Rec(y_train, y_pred_LR_train))
+print(" Rec_test:", Rec(y_test, y_pred_LR_test))
+print(" F1_train:", F1(y_train, y_pred_LR_train))
+print(" F1_test:", F1(y_test, y_pred_LR_test))
+print(" Confusion_matrix_train: ", CM(y_train, y_pred_LR_train))
+print(" Confusion_matrix_test: ", CM(y_test, y_pred_LR_test))
+
+cm_train= CM(y_train, y_pred_LR_train)
+cm_test = CM(y_test, y_pred_LR_test)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_train,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Logistic Regression - Train)")
+# plt.show()
+plt.savefig("LR_CM_Train.png",
+            dpi=300,
+            bbox_inches="tight")
+
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_test,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Logistic Regression - Test)")
+# plt.show()
+plt.savefig("LR_CM_Test.png",
+            dpi = 300, 
+            bbox_inches = "tight")
+
+#KNN 
+y_pred_KNN_train = model_KNN.predict(X_train)
+y_pred_KNN_test = model_KNN.predict(X_test)
+print("K-Nearest Neighbors")
+print(" ACC_train:", ACC(y_train, y_pred_KNN_train))
+print(" ACC_test:", ACC(y_test, y_pred_KNN_test))
+print(" AUC_train:", AUC(y_train, y_pred_KNN_train))
+print(" AUC_test:", AUC(y_test, y_pred_KNN_test))
+print(" Prec_train:", Prec(y_train, y_pred_KNN_train))
+print(" Prec_test:", Prec(y_test, y_pred_KNN_test))
+print(" Rec_train:", Rec(y_train, y_pred_KNN_train))
+print(" Rec_test:", Rec(y_test, y_pred_KNN_test))
+print(" F1_train:", F1(y_train, y_pred_KNN_train))
+print(" F1_test:", F1(y_test, y_pred_KNN_test))
+print(" Confusion_matrix_train: ", CM(y_train, y_pred_KNN_train))
+print(" Confusion_matrix_test: ", CM(y_test, y_pred_KNN_test))
+
+cm_train= CM(y_train, y_pred_KNN_train)
+cm_test = CM(y_test, y_pred_KNN_test)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_train,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (K-Nearest Neighbors - Train)")
+# plt.show()
+plt.savefig("KNN_CM_Train.png",
+            dpi = 300, 
+            bbox_inches="tight")
+
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_test,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (K-Nearest Neighbors - Test)")
+# plt.show()
+plt.savefig("KNN_CM_Test.png",
+            dpi = 300, 
+            bbox_inches = "tight")
+
+
+
+#DTC
+y_pred_DTC_train = model_DTC.predict(X_train)
+y_pred_DTC_test = model_DTC.predict(X_test)
+print("Decision Tree Classifier")
+print(" ACC_train:", ACC(y_train, y_pred_DTC_train))
+print(" ACC_test:", ACC(y_test, y_pred_DTC_test))
+print(" AUC_train:", AUC(y_train, y_pred_DTC_train))
+print(" AUC_test:", AUC(y_test, y_pred_DTC_test))
+print(" Prec_train:", Prec(y_train, y_pred_DTC_train))
+print(" Prec_test:", Prec(y_test, y_pred_DTC_test))
+print(" Rec_train:", Rec(y_train, y_pred_DTC_train))
+print(" Rec_test:", Rec(y_test, y_pred_DTC_test))
+print(" F1_train:", F1(y_train, y_pred_DTC_train))
+print(" F1_test:", F1(y_test, y_pred_DTC_test))
+print(" Confusion_matrix_train: ", CM(y_train, y_pred_DTC_train))
+print(" Confusion_matrix_test: ", CM(y_test, y_pred_DTC_test))
+
+cm_train= CM(y_train, y_pred_DTC_train)
+cm_test = CM(y_test, y_pred_DTC_test)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_train,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Decision Tree Classifier - Train)")
+# plt.show()
+plt.savefig("DTC_CM_Train.png",
+            dpi = 300, 
+            bbox_inches = "tight")
+
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_test,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Decision Tree Classifier - Test)")
+# plt.show()
+plt.savefig("DTC_CM_Test.png",
+            dpi = 300, 
+            bbox_inches="tight")
+
+
+#RFC
+y_pred_RFC_train = model_RFC.predict(X_train)
+y_pred_RFC_test = model_RFC.predict(X_test)
+print("Random Forest Classifier")
+print(" ACC_train:", ACC(y_train, y_pred_RFC_train))
+print(" ACC_test:", ACC(y_test, y_pred_RFC_test))
+print(" AUC_train:", AUC(y_train, y_pred_RFC_train))
+print(" AUC_test:", AUC(y_test, y_pred_RFC_test))
+print(" Prec_train:", Prec(y_train, y_pred_RFC_train))
+print(" Prec_test:", Prec(y_test, y_pred_RFC_test))
+print(" Rec_train:", Rec(y_train, y_pred_RFC_train))
+print(" Rec_test:", Rec(y_test, y_pred_RFC_test))
+print(" F1_train:", F1(y_train, y_pred_RFC_train))
+print(" F1_test:", F1(y_test, y_pred_RFC_test))
+print(" Confusion_matrix_train: ", CM(y_train, y_pred_RFC_train))
+print(" Confusion_matrix_test: ", CM(y_test, y_pred_RFC_test))
+
+cm_train= CM(y_train, y_pred_RFC_train)
+cm_test = CM(y_test, y_pred_RFC_test)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_train,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Random Forest Classifier - Train)")
+# plt.show()
+plt.savefig("RFC_CM_Train.png",
+            dpi = 300,
+            bbox_inches="tight")
+
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_test,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Random Forest Classifier - Test)")
+# plt.show()
+plt.savefig("RFC_CM_Test.png",
+            dpi = 300,
+            bbox_inches="tight")
+
+
+#SCV
+y_pred_SVC_train = model_SVC.predict(X_train)
+y_pred_SVC_test = model_SVC.predict(X_test)
+print("Support Vector Classifier")
+print(" ACC_train:", ACC(y_train, y_pred_SVC_train))
+print(" ACC_test:", ACC(y_test, y_pred_SVC_test))
+print(" AUC_train:", AUC(y_train, y_pred_SVC_train))
+print(" AUC_test:", AUC(y_test, y_pred_SVC_test))
+print(" Prec_train:", Prec(y_train, y_pred_SVC_train))
+print(" Prec_test:", Prec(y_test, y_pred_SVC_test))
+print(" Rec_train:", Rec(y_train, y_pred_SVC_train))
+print(" Rec_test:", Rec(y_test, y_pred_SVC_test))
+print(" F1_train:", F1(y_train, y_pred_SVC_train))
+print(" F1_test:", F1(y_test, y_pred_SVC_test))
+print(" Confusion_matrix_train: ", CM(y_train, y_pred_SVC_train))
+print(" Confusion_matrix_test: ", CM(y_test, y_pred_SVC_test))
+
+cm_train= CM(y_train, y_pred_SVC_train)
+cm_test = CM(y_test, y_pred_SVC_test)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_train,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Support Vector Classifier - Train)")
+# plt.show()
+plt.savefig("SVC_CM_Train.png",
+            dpi = 300,
+            bbox_inches="tight")
+
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_test,annot=True,fmt="d",cmap="Blues",
+xticklabels=["Malignant (0)", "Benign (1)"],
+yticklabels=["Malignant (0)", "Benign (1)"])
+
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.title("Confusion Matrix (Support Vector Classifier - Test)")
+# plt.show()
+plt.savefig("SVC_CM_Test.png",
+            dpi = 300,
+            bbox_inches="tight")

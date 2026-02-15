@@ -1,0 +1,81 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 16:09:26 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import load_digits
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, accuracy_score, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------------------
+# Step 1 — Load the dataset
+# ------------------------------------------------------------
+X, y = load_digits(return_X_y=True)
+
+# ------------------------------------------------------------
+# Step 2 — Scale features (essential for neural networks!)
+# ------------------------------------------------------------
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# ------------------------------------------------------------
+# Step 3 — Train–test split
+# ------------------------------------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.3,
+    random_state=42,
+    stratify=y
+)
+
+# ------------------------------------------------------------
+# Step 4 — Initialize the MLP classifier
+# ------------------------------------------------------------
+clf = MLPClassifier(
+    hidden_layer_sizes=(100, 50),
+    activation='relu',
+    solver='adam',
+    learning_rate='adaptive',
+    max_iter=500,
+    random_state=42
+)
+
+# ------------------------------------------------------------
+# Step 5 — Train the model
+# ------------------------------------------------------------
+clf.fit(X_train, y_train)
+
+# ------------------------------------------------------------
+# Step 6 — Predict on the test set
+# ------------------------------------------------------------
+y_pred = clf.predict(X_test)
+
+# ------------------------------------------------------------
+# Step 7 — Evaluate performance
+# ------------------------------------------------------------
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# ------------------------------------------------------------
+# Step 8 — Confusion matrix
+# ------------------------------------------------------------
+disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test)
+plt.title("Confusion Matrix – MLPClassifier (Digits Dataset)")
+plt.grid(False)
+plt.show()
+
+# ------------------------------------------------------------
+# Step 9 — Plot loss curve
+# ------------------------------------------------------------
+plt.plot(clf.loss_curve_)
+plt.title("MLP Training Loss Curve")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.grid(True)
+plt.show()

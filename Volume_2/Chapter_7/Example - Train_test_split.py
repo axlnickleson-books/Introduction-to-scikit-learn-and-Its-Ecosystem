@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  2 14:40:01 2025
+
+@author: Admin
+"""
+
+# ============================================================
+# Example: Splitting the Iris Dataset into Train/Test Sets
+# ============================================================
+
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_iris
+
+# ------------------------------------------------------------
+# 1. Load the dataset
+# ------------------------------------------------------------
+# load_iris(return_X_y=True) returns:
+#   X : Features (shape: 150 x 4)
+#   y : Target labels (0 = setosa, 1 = versicolor, 2 = virginica)
+X, y = load_iris(return_X_y=True)
+
+# ------------------------------------------------------------
+# 2. Split the data into training and testing sets
+# ------------------------------------------------------------
+# Parameters used:
+#   test_size=0.3      → 30% of data becomes test set (45 samples)
+#   random_state=42    → Ensures reproducibility
+#   stratify=y         → Preserves class distribution in train/test
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.3,
+    random_state=42,
+    stratify=y
+)
+
+# ------------------------------------------------------------
+# 3. Print shapes to verify the split
+# ------------------------------------------------------------
+print("X_train shape:", X_train.shape)
+print("X_test shape: ", X_test.shape)
+print("y_train shape:", y_train.shape)
+print("y_test shape: ", y_test.shape)
