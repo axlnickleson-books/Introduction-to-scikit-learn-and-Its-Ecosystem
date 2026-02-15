@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 28 13:49:48 2025
+
+@author: Admin
+"""
+
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score
+import time
+	
+X, y = make_classification(n_samples=50000, n_features=20, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+	
+start = time.time()
+gb = GradientBoostingClassifier()
+gb.fit(X_train, y_train)
+print("Accuracy (sklearn):", accuracy_score(y_test, gb.predict(X_test)))
+print("Training Time (s):", time.time() - start)
